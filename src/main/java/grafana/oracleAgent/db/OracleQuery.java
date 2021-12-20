@@ -342,7 +342,7 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("tablespace") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("tablespace").replaceAll("\\\\","/") + "','" +
                             rs.getString("physical_reads") + "','" + rs.getString("physical_writes") + "','" +
                             rs.getString("physical_block_reads") + "','" + rs.getString("physical_block_writes") + "','" +
                             rs.getString("single_block_reads") + "','" + rs.getString("read_time") + "','" +
