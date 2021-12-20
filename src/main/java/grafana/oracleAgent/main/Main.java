@@ -21,6 +21,7 @@ public class Main {
     static String cronSchedulerSgaUsage = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-SGAUSAGE");
     static String cronSchedulerExportDatafileIO = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-DATAFILEIO");
     static String cronSchedulerExportServerInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-SERVER-INFO");
+    static String cronSchedulerArchiveLogMode = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-ARCHIVELOG-MODE");
 
     public static void main(String[] args)  {
         PropertyConfigurator.configure("./cfg/log4j.properties");
@@ -94,6 +95,15 @@ public class Main {
             }
         });
 
+        Scheduler archiveLogMode = new Scheduler();
+        archiveLogMode.schedule(cronSchedulerArchiveLogMode, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.archiveLogMode(OracleConnection, MysqlConnection);
+                log.info("exportDatafileIO - run Completed");
+            }
+        });
+
 
 
 
@@ -103,6 +113,7 @@ public class Main {
         exporttempBySession.start();
         exportSgaUsage.start();
         exportDatafileIO.start();
+        archiveLogMode.start();
 
         /*
         // Lascia in esecuzione per dieci minuti.

@@ -362,4 +362,37 @@ public class OracleQuery {
         }
     }
 
+
+    public void archiveLogMode(Connection OracleConnection, Connection MysqlConnection) {
+        String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,log_mode, decode(log_mode,'NOARCHIVELOG',0,1) log_enabled from v$database";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.dblogmode (extraction_date, log_mode,log_enabled) VALUES ";
+        try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY)) {
+            ResultSet rs = statement.executeQuery(sqlQuery);
+            List<String> ExportList = new ArrayList<String>();
+            int last = 1;
+            int size = 0;
+            if (rs != null) {
+                rs.last();    // moves cursor to the last row
+                size = rs.getRow(); // get row id
+            }
+            rs.beforeFirst();
+            if (size > 0) {
+                while (rs.next()) {
+                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("log_mode") + "','" +
+                            rs.getString("log_enabled") + "')";
+                    if (last < size) {
+                        sqlInsert = sqlInsert + ",";
+                    }
+                    last++;
+                }
+                MySQLInsert mySQLInsert = new MySQLInsert();
+                mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 2, "grafana_oracleagent.dblogmode");
+            }
+        } catch (SQLException e) {
+            log.error(sqlInsert);
+            log.error(e);
+        }
+    }
+
 }
