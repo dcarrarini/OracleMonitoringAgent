@@ -5,8 +5,6 @@ import grafana.oracleAgent.main.PropertiesReader;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class OracleDB {
