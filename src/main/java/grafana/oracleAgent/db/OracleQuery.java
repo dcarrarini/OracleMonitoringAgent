@@ -386,8 +386,85 @@ public class OracleQuery {
                     }
                     last++;
                 }
+                log.info(sqlInsert);
                 MySQLInsert mySQLInsert = new MySQLInsert();
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 2, "grafana_oracleagent.dblogmode");
+            }
+        } catch (SQLException e) {
+            log.error(sqlInsert);
+            log.error(e);
+        }
+    }
+
+
+    public void exporterSessions(Connection OracleConnection, Connection MysqlConnection) {
+        String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,username, sid, serial# serial,to_char(logon_time, 'yyyy-mm-dd hh24:mi:ss') logon_time, status,  machine, program, sql_id from v$session where username is not null";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.sessions (extraction_date, username,sid, serial,logon_time, status, machine, program,sql_id) VALUES ";
+        try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY)) {
+            ResultSet rs = statement.executeQuery(sqlQuery);
+            List<String> ExportList = new ArrayList<String>();
+            int last = 1;
+            int size = 0;
+            if (rs != null) {
+                rs.last();    // moves cursor to the last row
+                size = rs.getRow(); // get row id
+            }
+            rs.beforeFirst();
+            if (size > 0) {
+                while (rs.next()) {
+                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("username") + "','" +
+                            rs.getInt("sid") + "','" +
+                            rs.getInt("serial") + "','" +
+                            rs.getString("logon_time") + "','" +
+                            rs.getString("status") + "','" +
+                            rs.getString("machine") + "','" +
+                            rs.getString("program") + "','" +
+                            rs.getString("sql_id") + "')";
+                    if (last < size) {
+                        sqlInsert = sqlInsert + ",";
+                    }
+                    last++;
+                }
+                MySQLInsert mySQLInsert = new MySQLInsert();
+                mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.sessions");
+            }
+        } catch (SQLException e) {
+            log.error(sqlInsert);
+            log.error(e);
+        }
+    }
+
+
+    public void exporterRunningSQL(Connection OracleConnection, Connection MysqlConnection) {
+        String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,x.sid,x.serial# serial,x.username,x.sql_id,optimizer_mode,sql_text from v$sqlarea sqlarea,v$session x where  x.sql_hash_value = sqlarea.hash_value and x.sql_address = sqlarea.address and x.username is not null";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.running_sql (extraction_date,username,sid,serial,sql_id,optimizer_mode,sql_text) VALUES ";
+        try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY)) {
+            ResultSet rs = statement.executeQuery(sqlQuery);
+            List<String> ExportList = new ArrayList<String>();
+            int last = 1;
+            int size = 0;
+            if (rs != null) {
+                rs.last();    // moves cursor to the last row
+                size = rs.getRow(); // get row id
+            }
+            rs.beforeFirst();
+            if (size > 0) {
+                while (rs.next()) {
+                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("username") + "','" +
+                            rs.getInt("sid") + "','" +
+                            rs.getInt("serial") + "','" +
+                            rs.getString("sql_id") + "','" +
+                            rs.getString("optimizer_mode") + "','" +
+                            rs.getString("sql_text").replaceAll("'","''") + "')";
+                    if (last < size) {
+                        sqlInsert = sqlInsert + ",";
+                    }
+                    last++;
+                }
+                MySQLInsert mySQLInsert = new MySQLInsert();
+                mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.running_sql");
             }
         } catch (SQLException e) {
             log.error(sqlInsert);

@@ -22,6 +22,7 @@ public class Main {
     static String cronSchedulerExportDatafileIO = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-DATAFILEIO");
     static String cronSchedulerExportServerInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-SERVER-INFO");
     static String cronSchedulerArchiveLogMode = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-ARCHIVELOG-MODE");
+    static String cronSchedulerSessionsDetails = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-SESSIONS-DETAILS");
 
     public static void main(String[] args)  {
         PropertyConfigurator.configure("./cfg/log4j.properties");
@@ -95,12 +96,22 @@ public class Main {
             }
         });
 
-        Scheduler archiveLogMode = new Scheduler();
-        archiveLogMode.schedule(cronSchedulerArchiveLogMode, new Runnable() {
+        Scheduler exporterArchiveLogMode = new Scheduler();
+        exporterArchiveLogMode.schedule(cronSchedulerArchiveLogMode, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
                 otbs.archiveLogMode(OracleConnection, MysqlConnection);
-                log.info("exportDatafileIO - run Completed");
+                log.info("exporterArchiveLogMode - run Completed");
+            }
+        });
+
+        Scheduler exporterSessionsDetails = new Scheduler();
+        exporterSessionsDetails.schedule(cronSchedulerSessionsDetails, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.exporterSessions(OracleConnection, MysqlConnection);
+                otbs.exporterRunningSQL(OracleConnection, MysqlConnection);
+                log.info("exporterSessionsDetails - run Completed");
             }
         });
 
@@ -113,7 +124,8 @@ public class Main {
         exporttempBySession.start();
         exportSgaUsage.start();
         exportDatafileIO.start();
-        archiveLogMode.start();
+        exporterArchiveLogMode.start();
+        exporterSessionsDetails.start();
 
         /*
         // Lascia in esecuzione per dieci minuti.
