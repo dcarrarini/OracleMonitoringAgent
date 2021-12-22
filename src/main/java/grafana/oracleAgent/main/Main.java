@@ -23,6 +23,9 @@ public class Main {
     static String cronSchedulerExportServerInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-SERVER-INFO");
     static String cronSchedulerArchiveLogMode = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-ARCHIVELOG-MODE");
     static String cronSchedulerSessionsDetails = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-SESSIONS-DETAILS");
+    static String cronSchedulerRedoLog = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-REDO-LOG");
+    static String cronSchedulerDBBasicInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-DB-BASIC-INFO");
+    static String cronSchedulerTablesInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TABLES-INFO");
 
     public static void main(String[] args)  {
         PropertyConfigurator.configure("./cfg/log4j.properties");
@@ -101,6 +104,7 @@ public class Main {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
                 otbs.archiveLogMode(OracleConnection, MysqlConnection);
+                //otbs.exporterRedoLOG(OracleConnection, MysqlConnection);
                 log.info("exporterArchiveLogMode - run Completed");
             }
         });
@@ -115,8 +119,33 @@ public class Main {
             }
         });
 
+        Scheduler exporterRedoLog = new Scheduler();
+        exporterRedoLog.schedule(cronSchedulerRedoLog, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.exporterRedoLOG(OracleConnection, MysqlConnection);
+                log.info("exporterRedoLog - run Completed");
+            }
+        });
 
+        Scheduler exporterDBBasicInfo = new Scheduler();
+        exporterDBBasicInfo.schedule(cronSchedulerDBBasicInfo, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.exporterDBInfo(OracleConnection, MysqlConnection);
+                otbs.exporterDBVersion(OracleConnection, MysqlConnection);
+                log.info("exporterRedoLog - run Completed");
+            }
+        });
 
+        Scheduler exporterTablesInfo = new Scheduler();
+        exporterTablesInfo.schedule(cronSchedulerTablesInfo, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.exporterTablesInfo(OracleConnection, MysqlConnection);
+                log.info("exporterTablesInfo - run Completed");
+            }
+        });
 
         // Avvia lo scheduler.
         schedulerTablespaces.start();
@@ -126,6 +155,9 @@ public class Main {
         exportDatafileIO.start();
         exporterArchiveLogMode.start();
         exporterSessionsDetails.start();
+        exporterRedoLog.start();
+        exporterDBBasicInfo.start();
+        exporterTablesInfo.start();
 
         /*
         // Lascia in esecuzione per dieci minuti.
