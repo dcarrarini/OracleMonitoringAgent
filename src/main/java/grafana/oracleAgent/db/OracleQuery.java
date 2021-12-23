@@ -507,7 +507,6 @@ public class OracleQuery {
                     }
                     last++;
                 }
-                log.info(sqlInsert);
                 MySQLInsert mySQLInsert = new MySQLInsert();
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.redo_log");
             }
@@ -541,7 +540,6 @@ public class OracleQuery {
                     }
                     last++;
                 }
-                log.info(sqlInsert);
                 MySQLInsert mySQLInsert = new MySQLInsert();
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 2, "grafana_oracleagent.database_info");
             }
@@ -575,7 +573,6 @@ public class OracleQuery {
                     }
                     last++;
                 }
-                log.info(sqlInsert);
                 MySQLInsert mySQLInsert = new MySQLInsert();
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 2, "grafana_oracleagent.database_version");
             }
@@ -624,7 +621,6 @@ public class OracleQuery {
                     }
                     last++;
                 }
-                log.info(sqlInsert);
                 MySQLInsert mySQLInsert = new MySQLInsert();
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.tables_info");
             }
@@ -633,5 +629,104 @@ public class OracleQuery {
             log.error(e);
         }
     }
+    public void exporterTop10Tables(Connection OracleConnection, Connection MysqlConnection) {
+        log.info("exporterRedoLOG");
+        String sqlQuery = "select\n" +
+                "        *\n" +
+                "       from (select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime, \n" +
+                "      owner,\n" +
+                "      segment_name,\n" +
+                "      round(bytes/1024/1024) size_mb\n" +
+                "   from\n" +
+                "      dba_segments\n" +
+                "   where\n" +
+                "      segment_type = 'TABLE'\n" +
+                "       AND (   tablespace_name NOT IN ('SYSTEM', 'SYSAUX', 'USERS')\n" +
+                "            OR owner = 'EDM')\n" +
+                "   order by\n" +
+                "      bytes/1024/1024 desc)\n" +
+                "where\n" +
+                "   rownum <= 10";
+        //log.info("sqlQuery:"+sqlQuery);
+        String sqlInsert = "INSERT INTO grafana_oracleagent.top10tables (extraction_date,owner,table_name,size_mb) VALUES ";
+        try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY)) {
+            ResultSet rs = statement.executeQuery(sqlQuery);
+            List<String> ExportList = new ArrayList<String>();
+            int last = 1;
+            int size = 0;
+            if (rs != null) {
+                rs.last();    // moves cursor to the last row
+                size = rs.getRow(); // get row id
+            }
+            rs.beforeFirst();
+            if (size > 0) {
+                while (rs.next()) {
+                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" +
+                            rs.getString("owner") + "','" +
+                            rs.getString("segment_name") + "','" +
+                            rs.getInt("size_mb") + "')";
+                    if (last < size) {
+                        sqlInsert = sqlInsert + ",";
+                    }
+                    last++;
+                }
+                //log.info("SQL:"+sqlInsert);
+                MySQLInsert mySQLInsert = new MySQLInsert();
+                mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.top10tables");
+            }
+        } catch (SQLException e) {
+            log.error(sqlInsert);
+            log.error(e);
+        }
+    }
 
+    public void exporterStaleStats(Connection OracleConnection, Connection MysqlConnection) {
+        log.info("exporterRedoLOG");
+        String sqlQuery = "SELECT TO_CHAR (SYSDATE, 'yyyy-mm-dd hh24:mi:ss')          AS datetime,\n" +
+                "       s.owner,\n" +
+                "       s.table_name,\n" +
+                "       s.stale_stats,\n" +
+                "       CASE WHEN stale_stats = 'YES' THEN 1 ELSE 0 END     stale_stats_boo,\n" +
+                "       TO_CHAR (s.last_analyzed, 'yyyy-mm-dd hh24:mi:ss') as last_analyzed\n" +
+                "  FROM dba_tab_statistics s, dba_tables t\n" +
+                " WHERE     s.table_name = t.table_name\n" +
+                "       AND t.owner = s.owner\n" +
+                "       AND (   t.tablespace_name NOT IN ('SYSTEM', 'SYSAUX', 'USERS')\n" +
+                "            OR t.owner = 'EDM')";
+        //log.info("sqlQuery:"+sqlQuery);
+        String sqlInsert = "INSERT INTO grafana_oracleagent.stale_stats (extraction_date,owner,table_name,stale_stats,stale_stats_boo,last_analyzed) VALUES ";
+        try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY)) {
+            ResultSet rs = statement.executeQuery(sqlQuery);
+            List<String> ExportList = new ArrayList<String>();
+            int last = 1;
+            int size = 0;
+            if (rs != null) {
+                rs.last();    // moves cursor to the last row
+                size = rs.getRow(); // get row id
+            }
+            rs.beforeFirst();
+            if (size > 0) {
+                while (rs.next()) {
+                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" +
+                            rs.getString("owner") + "','" +
+                            rs.getString("table_name") + "','" +
+                            rs.getString("stale_stats") + "','" +
+                            rs.getInt("stale_stats_boo") + "','" +
+                            rs.getString("last_analyzed") + "')";
+                    if (last < size) {
+                        sqlInsert = sqlInsert + ",";
+                    }
+                    last++;
+                }
+                //log.info("SQL:"+sqlInsert);
+                MySQLInsert mySQLInsert = new MySQLInsert();
+                mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.top10tables");
+            }
+        } catch (SQLException e) {
+            log.error(sqlInsert);
+            log.error(e);
+        }
+    }
 }
