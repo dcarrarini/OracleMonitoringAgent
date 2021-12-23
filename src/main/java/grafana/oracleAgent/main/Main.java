@@ -26,6 +26,8 @@ public class Main {
     static String cronSchedulerRedoLog = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-REDO-LOG");
     static String cronSchedulerDBBasicInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-DB-BASIC-INFO");
     static String cronSchedulerTablesInfo = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TABLES-INFO");
+    static String cronSchedulerTop10Tables = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TOP-10-TABLES");
+    static String cronSchedulerStaleStats = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-STALE-STATS");
 
     public static void main(String[] args)  {
         PropertyConfigurator.configure("./cfg/log4j.properties");
@@ -147,6 +149,25 @@ public class Main {
             }
         });
 
+        Scheduler exporterTop10Tables = new Scheduler();
+        exporterTop10Tables.schedule(cronSchedulerTop10Tables, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.exporterTop10Tables(OracleConnection, MysqlConnection);
+                log.info("exporterTop10Tables - run Completed");
+            }
+        });
+
+        Scheduler exporterStaleStats = new Scheduler();
+        exporterStaleStats.schedule(cronSchedulerStaleStats, new Runnable() {
+            public void run() {
+                OracleQuery otbs = new OracleQuery();
+                otbs.exporterStaleStats(OracleConnection, MysqlConnection);
+                log.info("exporterStaleStats - run Completed");
+            }
+        });
+
+
         // Avvia lo scheduler.
         schedulerTablespaces.start();
         schedulerTopConsuming.start();
@@ -158,6 +179,8 @@ public class Main {
         exporterRedoLog.start();
         exporterDBBasicInfo.start();
         exporterTablesInfo.start();
+        exporterTop10Tables.start();
+        exporterStaleStats.start();
 
         /*
         // Lascia in esecuzione per dieci minuti.
