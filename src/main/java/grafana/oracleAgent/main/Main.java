@@ -14,6 +14,8 @@ import org.apache.log4j.PropertyConfigurator;
 public class Main {
     static Logger log = Logger.getLogger(Main.class.getName());
     static Properties configurator = PropertiesReader.getProperties();
+    //Carico dbid
+    public static String DBID = configurator.getProperty("DBID");
     //Carico le schedulazioni
     static String cronSchedulerTablespace = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TABLESPACES");
     static String cronSchedulerTopConsuming = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TOPCONSUMING");

@@ -1,7 +1,6 @@
 package grafana.oracleAgent.db;
 
-import grafana.oracleAgent.csv.CSVExport;
-import grafana.oracleAgent.csv.TablespaceCSV;
+import grafana.oracleAgent.main.Main;
 import grafana.oracleAgent.main.PropertiesReader;
 import org.apache.log4j.Logger;
 
@@ -17,11 +16,18 @@ public class OracleQuery {
     static Properties configurator = PropertiesReader.getProperties();
     static Logger log = Logger.getLogger(OracleDB.class.getName());
 
+    //AVOID LITERAL - SONARLINT
+    String datetime = "datetime";
+    String tablespace = "tablespace";
+    String username = "username";
+    String program = "program";
+    String status = "status";
+    String sql_id = "sql_id";
 
     public void exportTablespace(Connection OracleConnection, Connection MysqlConnection) {
         //Connection OracleConnection = connect();
         String sqlQuery = "SELECT  to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') AS datetime,tablespace_name,megs_used \"UsedMb\",megs_alloc \"AllocatedMb\",MAX \"TotalMb\",100-round(megs_used*100/MAX) \"FreePercentage\" FROM (SELECT a.tablespace_name, ROUND (a.bytes_alloc / 1024 / 1024) megs_alloc, ROUND (NVL (b.bytes_free, 0) / 1024 / 1024) megs_free, ROUND ((a.bytes_alloc - NVL (b.bytes_free, 0)) / 1024 / 1024) megs_used, ROUND ((NVL (b.bytes_free, 0) / a.bytes_alloc) * 100) pct_free, 100 - ROUND ((NVL (b.bytes_free, 0) / a.bytes_alloc) * 100) pct_used, ROUND (maxbytes / 1048576) MAX FROM ( SELECT f.tablespace_name, SUM (f.bytes) bytes_alloc, SUM ( DECODE (f.autoextensible, 'YES', f.maxbytes, 'NO', f.bytes)) maxbytes FROM dba_data_files f GROUP BY tablespace_name) a, ( SELECT f.tablespace_name, SUM (f.bytes) bytes_free FROM dba_free_space f GROUP BY tablespace_name) b WHERE a.tablespace_name = b.tablespace_name(+) UNION ALL SELECT h.tablespace_name, ROUND (SUM (h.bytes_free + h.bytes_used) / 1048576) megs_alloc, ROUND ( SUM ( (h.bytes_free + h.bytes_used) - NVL (p.bytes_used, 0)) / 1048576) megs_free, ROUND (SUM (NVL (p.bytes_used, 0)) / 1048576) megs_used, ROUND ( ( SUM ( (h.bytes_free + h.bytes_used) - NVL (p.bytes_used, 0)) / SUM (h.bytes_used + h.bytes_free)) * 100) pct_free, 100 - ROUND ( ( SUM ( (h.bytes_free + h.bytes_used) - NVL (p.bytes_used, 0)) / SUM (h.bytes_used + h.bytes_free)) * 100) pct_used, ROUND ( SUM ( DECODE (f.autoextensible, 'YES', f.maxbytes, 'NO', f.bytes) / 1048576)) MAX FROM sys.v_$temp_space_header h, sys.v_$temp_extent_pool p, dba_temp_files f WHERE p.file_id(+) = h.file_id AND p.tablespace_name(+) = h.tablespace_name AND f.file_id = h.file_id AND f.tablespace_name = h.tablespace_name GROUP BY h.tablespace_name ORDER BY 1)";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.tablespace (extraction_date,Tablespace,UsedMb,AllocatedMb,TotalMb,FreePercentage)VALUES";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.tablespace (extraction_date,Tablespace,UsedMb,AllocatedMb,TotalMb,FreePercentage, dbid)VALUES";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -35,9 +41,9 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("tablespace_name") +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("tablespace_name") +
                             "','" + rs.getString("UsedMb") + "','" + rs.getString("AllocatedMb") + "','" +
-                            rs.getString("TotalMb") + "','" + rs.getString("FreePercentage") + "')";
+                            rs.getString("TotalMb") + "','" + rs.getString("FreePercentage") + "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -54,7 +60,7 @@ public class OracleQuery {
 
     public void exportSQLTOPConsumingMoreCPU(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "SELECT  to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,b.tablespace,ROUND(((b.blocks*p.value)/1024/1024),2)||'M' AS temp_size, a.inst_id as Instance, a.sid||','||a.serial# AS sid_serial, NVL(a.username, '(oracle)') AS username, a.program, a.status, a.sql_id, t.SQL_TEXT fulltext FROM gv$session a, gv$sort_usage b, gv$parameter p, v$sqltext t WHERE p.name = 'db_block_size' AND a.saddr = b.session_addr AND a.inst_id=b.inst_id AND a.inst_id=p.inst_id and t.sql_id=a.sql_id ORDER BY temp_size desc";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.exportSQLTOPConsumingMoreCPU (extraction_date,ospid,sid,serial,sql_id,sql_text,username,program,module,osuser,machine,status,cpu_usage_sec) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.exportSQLTOPConsumingMoreCPU (extraction_date,ospid,sid,serial,sql_id,sql_text,username,program,module,osuser,machine,status,cpu_usage_sec, dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -69,10 +75,10 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("tablespace")
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(tablespace)
                             + "','" + rs.getString("temp_size") + "','" + rs.getString("Instance") + "','" +
-                            rs.getString("sid_serial") + "','" + rs.getString("username") + "','" + rs.getString("program")
-                            + "','" + rs.getString("status") + "','" + rs.getString("sql_id") + "','" + rs.getString("fulltext") + "')";
+                            rs.getString("sid_serial") + "','" + rs.getString(username) + "','" + rs.getString(program)
+                            + "','" + rs.getString(status) + "','" + rs.getString(sql_id) + "','" + rs.getString("fulltext")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -89,7 +95,7 @@ public class OracleQuery {
 
     public void exportTop10CPUconsumingSession(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "select rownum as rank, a.* from (SELECT to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime, v.sid,sess.Serial# sess_serial ,program, round(v.value / (100 * 60),3) CPU_Mins FROM v$statname s , v$sesstat v, v$session sess WHERE s.name = 'CPU used by this session' and sess.sid = v.sid and v.statistic#=s.statistic# and v.value>0 ORDER BY v.value DESC) a where rownum < 11";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.top10sessioncpu (extraction_date,rank,sid,sess_serial,program,CPU_Mins) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.top10sessioncpu (extraction_date,rank,sid,sess_serial,program,CPU_Mins,dbid) VALUES ";
 
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
@@ -104,8 +110,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("rank") + "','" + rs.getString("sid") + "','" +
-                            rs.getString("sess_serial") + "','" + rs.getString("program") + "','" + rs.getString("CPU_Mins") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("rank") + "','" + rs.getString("sid") + "','" +
+                            rs.getString("sess_serial") + "','" + rs.getString(program) + "','" + rs.getString("CPU_Mins")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -121,7 +127,7 @@ public class OracleQuery {
 
     public void exporttempBySession(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "SELECT  to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,b.tablespace, ROUND(((b.blocks*p.value)/1024/1024),2)||'M' AS temp_size, a.inst_id as Instance, a.sid||','||a.serial# AS sid_serial, NVL(a.username, '(oracle)') AS username, a.program, a.status, a.sql_id, t.SQL_TEXT fulltext FROM gv$session a, gv$sort_usage b, gv$parameter p, v$sqltext t WHERE p.name = 'db_block_size' AND a.saddr = b.session_addr AND a.inst_id=b.inst_id AND a.inst_id=p.inst_id and t.sql_id=a.sql_id ORDER BY temp_size desc";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.exportSQLTOPConsumingMoreCPU (extraction_date,tablespace,temp_size,Instance,sid_serial,username,program,status,sql_id,fulltext) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.exportSQLTOPConsumingMoreCPU (extraction_date,tablespace,temp_size,Instance,sid_serial,username,program,status,sql_id,fulltext,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -136,10 +142,10 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("tablespace") + "," +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(tablespace) + "," +
                             rs.getString("temp_size") + "," + rs.getString("Instance") + "," + rs.getString("sid_serial") + ","
-                            + rs.getString("username") + "," + rs.getString("program") + "," + rs.getString("status") + "," + rs.getString("sql_id")
-                            + "," + rs.getString("fulltext") + "')";
+                            + rs.getString(username) + "," + rs.getString(program) + "," + rs.getString(status) + "," + rs.getString(sql_id)
+                            + "," + rs.getString("fulltext")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -155,7 +161,7 @@ public class OracleQuery {
 
     public void exportCurrentActiveSession(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "SELECT to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,(SELECT COUNT (*) FROM V$SESSION) active, VP.VALUE AS MAX_SESSION  FROM V$PARAMETER VP WHERE VP.NAME in ('sessions')";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.current_active_sessions (extraction_date,active_sessions, max_sessions) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.current_active_sessions (extraction_date,active_sessions, max_sessions,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -170,8 +176,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("active") + "','" +
-                            rs.getString("max_session") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("active") + "','" +
+                            rs.getString("max_session")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -199,7 +205,7 @@ public class OracleQuery {
                 "  FROM dba_hist_osstat" +
                 " WHERE stat_name IN" +
                 "           ('NUM_CPU_CORES', 'NUM_CPU_SOCKETS', 'PHYSICAL_MEMORY_BYTES')";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.server_info (extraction_date,component, value) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.server_info (extraction_date,component, value,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -213,8 +219,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("component") + "','" +
-                            rs.getString("value") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("component") + "','" +
+                            rs.getString("value")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -240,7 +246,7 @@ public class OracleQuery {
                 "          FROM v$sgastat" +
                 "         WHERE name = 'free memory') free," +
                 "       (SELECT SUM (bytes) bytes FROM v$sgastat) tot";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.sga_usage (extraction_date,free_mb, used_mb,total_mb) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.sga_usage (extraction_date,free_mb, used_mb,total_mb,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -254,8 +260,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("free_mb") + "','" +
-                            rs.getString("used_mb") + "','" + rs.getString("total_mb") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("free_mb") + "','" +
+                            rs.getString("used_mb") + "','" + rs.getString("total_mb")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -310,7 +316,7 @@ public class OracleQuery {
                 "(extraction_date,tablespace,physical_reads,physical_writes," +
                 "physical_block_reads,physical_block_writes,single_block_reads," +
                 "read_time,write_time,single_block_read_time,avg_io_time," +
-                "last_io_time,min_io_time,max_io_read_time) VALUES ";
+                "last_io_time,min_io_time,max_io_read_time, dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -324,13 +330,13 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("tablespace").replaceAll("\\\\","/") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(tablespace).replaceAll("\\\\","/") + "','" +
                             rs.getString("physical_reads") + "','" + rs.getString("physical_writes") + "','" +
                             rs.getString("physical_block_reads") + "','" + rs.getString("physical_block_writes") + "','" +
                             rs.getString("single_block_reads") + "','" + rs.getString("read_time") + "','" +
                             rs.getString("write_time") + "','" + rs.getString("single_block_read_time") + "','" +
                             rs.getString("avg_io_time") + "','" + rs.getString("last_io_time") + "','" +
-                            rs.getString("min_io_time") + "','" + rs.getString("max_io_read_time") + "')";
+                            rs.getString("min_io_time") + "','" + rs.getString("max_io_read_time")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -347,7 +353,7 @@ public class OracleQuery {
 
     public void archiveLogMode(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,log_mode, decode(log_mode,'NOARCHIVELOG',0,1) log_enabled from v$database";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.dblogmode (extraction_date, log_mode,log_enabled) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.dblogmode (extraction_date, log_mode,log_enabled,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -361,8 +367,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("log_mode") + "','" +
-                            rs.getString("log_enabled") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("log_mode") + "','" +
+                            rs.getString("log_enabled")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -380,7 +386,7 @@ public class OracleQuery {
 
     public void exporterSessions(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,username, sid, serial# serial,to_char(logon_time, 'yyyy-mm-dd hh24:mi:ss') logon_time, status,  machine, program, sql_id from v$session where username is not null";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.sessions (extraction_date, username,sid, serial,logon_time, status, machine, program,sql_id) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.sessions (extraction_date, username,sid, serial,logon_time, status, machine, program,sql_id,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -394,14 +400,14 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("username") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(username) + "','" +
                             rs.getInt("sid") + "','" +
                             rs.getInt("serial") + "','" +
                             rs.getString("logon_time") + "','" +
-                            rs.getString("status") + "','" +
+                            rs.getString(status) + "','" +
                             rs.getString("machine") + "','" +
-                            rs.getString("program") + "','" +
-                            rs.getString("sql_id") + "')";
+                            rs.getString(program) + "','" +
+                            rs.getString(sql_id)+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -419,7 +425,7 @@ public class OracleQuery {
 
     public void exporterRunningSQL(Connection OracleConnection, Connection MysqlConnection) {
         String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,x.sid,x.serial# serial,x.username,x.sql_id,optimizer_mode,sql_text from v$sqlarea sqlarea,v$session x where  x.sql_hash_value = sqlarea.hash_value and x.sql_address = sqlarea.address and x.username is not null";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.running_sql (extraction_date,username,sid,serial,sql_id,optimizer_mode,sql_text) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.running_sql (extraction_date,username,sid,serial,sql_id,optimizer_mode,sql_text,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -433,12 +439,12 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("username") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(username) + "','" +
                             rs.getInt("sid") + "','" +
                             rs.getInt("serial") + "','" +
-                            rs.getString("sql_id") + "','" +
+                            rs.getString(sql_id) + "','" +
                             rs.getString("optimizer_mode") + "','" +
-                            rs.getString("sql_text").replaceAll("'","''") + "')";
+                            rs.getString("sql_text").replaceAll("'","''")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -476,7 +482,7 @@ public class OracleQuery {
                 "       f.TYPE,\n" +
                 "       replace(f.MEMBER,'\\','/') member\n" +
                 "  FROM v$log l JOIN v$logfile f ON (f.group# = l.group#)";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.redo_log (extraction_date,log_group,thread,sequence,size_mb,members,archived,status,log_switch,first_time,next_time, type, logfile) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.redo_log (extraction_date,log_group,thread,sequence,size_mb,members,archived,status,log_switch,first_time,next_time, type, logfile,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -490,18 +496,18 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getInt("group_") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getInt("group_") + "','" +
                             rs.getInt("thread") + "','" +
                             rs.getInt("sequence") + "','" +
                             rs.getInt("mb") + "','" +
                             rs.getInt("members") + "','" +
                             rs.getString("archived") + "','" +
-                            rs.getString("status") + "','" +
+                            rs.getString(status) + "','" +
                             rs.getInt("log_switch") + "','" +
                             rs.getString("first_time") + "','" +
                             rs.getString("next_time") + "','" +
                             rs.getString("type") + "','" +
-                            rs.getString("member") + "')";
+                            rs.getString("member") + "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -519,7 +525,7 @@ public class OracleQuery {
     public void exporterDBInfo(Connection OracleConnection, Connection MysqlConnection) {
         log.info("exporterRedoLOG");
         String sqlQuery = "select to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime,name, platform_name from V$database";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.database_info (extraction_date,name,platform_name) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.database_info (extraction_date,name,platform_name,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -533,8 +539,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" + rs.getString("name") + "','" +
-                            rs.getString("platform_name") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("name") + "','" +
+                            rs.getString("platform_name")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -552,7 +558,7 @@ public class OracleQuery {
     public void exporterDBVersion(Connection OracleConnection, Connection MysqlConnection) {
         log.info("exporterRedoLOG");
         String sqlQuery = "SELECT to_char(SYSDATE, 'yyyy-mm-dd hh24:mi:ss') as datetime, banner FROM v$version WHERE banner LIKE 'Oracle%'";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.database_version (extraction_date,version) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.database_version (extraction_date,version,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -566,8 +572,8 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" +
-                            rs.getString("banner") + "')";
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" +
+                            rs.getString("banner")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -595,7 +601,7 @@ public class OracleQuery {
                 "       AND (   t.tablespace_name NOT IN ('SYSTEM', 'SYSAUX', 'USERS')\n" +
                 "            OR t.owner = 'EDM'" +
                 ")";
-        String sqlInsert = "INSERT INTO grafana_oracleagent.tables_info (extraction_date,owner,table_name, tablespace_name,num_rows,size_mb,last_analyzed) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.tables_info (extraction_date,owner,table_name, tablespace_name,num_rows,size_mb,last_analyzed,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -609,13 +615,13 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" +
                             rs.getString("owner") + "','" +
                             rs.getString("table_name") + "','" +
                             rs.getString("tablespace_name") + "','" +
                             rs.getInt("num_rows") + "','" +
                             rs.getInt("size_mb") + "','" +
-                            rs.getString("last_analyzed") + "')";
+                            rs.getString("last_analyzed")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -648,7 +654,7 @@ public class OracleQuery {
                 "where\n" +
                 "   rownum <= 10";
         //log.info("sqlQuery:"+sqlQuery);
-        String sqlInsert = "INSERT INTO grafana_oracleagent.top10tables (extraction_date,owner,table_name,size_mb) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.top10tables (extraction_date,owner,table_name,size_mb,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -662,10 +668,10 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" +
                             rs.getString("owner") + "','" +
                             rs.getString("segment_name") + "','" +
-                            rs.getInt("size_mb") + "')";
+                            rs.getInt("size_mb")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -695,7 +701,7 @@ public class OracleQuery {
                 "       AND (   t.tablespace_name NOT IN ('SYSTEM', 'SYSAUX', 'USERS')\n" +
                 "            OR t.owner = 'EDM')";
         //log.info("sqlQuery:"+sqlQuery);
-        String sqlInsert = "INSERT INTO grafana_oracleagent.stale_stats (extraction_date,owner,table_name,stale_stats,stale_stats_boo,last_analyzed) VALUES ";
+        String sqlInsert = "INSERT INTO grafana_oracleagent.stale_stats (extraction_date,owner,table_name,stale_stats,stale_stats_boo,last_analyzed,dbid) VALUES ";
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -709,12 +715,12 @@ public class OracleQuery {
             rs.beforeFirst();
             if (size > 0) {
                 while (rs.next()) {
-                    sqlInsert = sqlInsert + "('" + rs.getString("datetime") + "','" +
+                    sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" +
                             rs.getString("owner") + "','" +
                             rs.getString("table_name") + "','" +
                             rs.getString("stale_stats") + "','" +
                             rs.getInt("stale_stats_boo") + "','" +
-                            rs.getString("last_analyzed") + "')";
+                            rs.getString("last_analyzed")+ "','" + Main.DBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
