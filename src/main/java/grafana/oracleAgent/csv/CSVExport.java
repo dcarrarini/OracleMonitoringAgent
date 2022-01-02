@@ -1,20 +1,20 @@
 package grafana.oracleAgent.csv;
 
+import grafana.oracleAgent.main.Main;
 import grafana.oracleAgent.main.PropertiesReader;
-import org.apache.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Properties;
 
 
 public class CSVExport {
     static Properties configurator = PropertiesReader.getProperties();
-    static Logger log = Logger.getLogger(TablespaceCSV.class.getName());
+    private static final Logger log
+            = LoggerFactory.getLogger(CSVExport.class);
     List<String> ExportList;
     String CSVFile;
 
@@ -39,7 +39,7 @@ public class CSVExport {
                 i++;
             }
         } catch (IOException e) {
-            log.error(e);
+            log.error("WriteCSV", e);
         }
     }
 }

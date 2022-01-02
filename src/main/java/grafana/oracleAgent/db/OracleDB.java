@@ -1,9 +1,8 @@
 package grafana.oracleAgent.db;
 
-import grafana.oracleAgent.csv.TablespaceCSV;
 import grafana.oracleAgent.main.PropertiesReader;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.Properties;
 
@@ -14,20 +13,21 @@ public class OracleDB {
     String ORACLE_DB_USER = configurator.getProperty("ORACLE_DB_USER");
     String ORACLE_DB_PASSWORD = configurator.getProperty("ORACLE_DB_PASSWORD");
 
-    static Logger log = Logger.getLogger(OracleDB.class.getName());
+    private static final Logger log
+            = LoggerFactory.getLogger(OracleDB.class);
 
     public Connection connect() {
         Connection dbConnection = null;
         try {
             Class.forName(ORACLE_JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
-           log.error(e);
+           log.error("OracleDB", e);
         }
         try {
             dbConnection = DriverManager.getConnection(ORACLE_DB_CONNECTION, ORACLE_DB_USER, ORACLE_DB_PASSWORD);
             return dbConnection;
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleDB", e);
         }
         return dbConnection;
     }

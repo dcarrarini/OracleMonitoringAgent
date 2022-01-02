@@ -1,10 +1,15 @@
 package grafana.oracleAgent.main;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
 
 public class PropertiesReader {
+	private static final Logger log
+			= LoggerFactory.getLogger(PropertiesReader.class);
 	static public String LoadProp(String sKey) {
 		String sValue = null;
 		Properties prop = new Properties();
@@ -14,13 +19,13 @@ public class PropertiesReader {
 			prop.load(input);
 			sValue = (prop.getProperty(sKey));
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			log.error("PropertiesReader", ex);
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("PropertiesReader", e);
 				}
 			}
 		}
@@ -36,7 +41,7 @@ public class PropertiesReader {
 			prop.load(input);
 			return prop;
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			log.error("PropertiesReader", ex);
 			return null;
 		}
 	}
@@ -54,13 +59,13 @@ public class PropertiesReader {
 				sValue = PropertiesReader.retriveMultiValues(sKey);
 			}
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			log.error("PropertiesReader", ex);
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("PropertiesReader", e);
 				}
 			}
 		}
@@ -77,13 +82,13 @@ public class PropertiesReader {
 			prop.load(input);
 			sValue = (prop.getProperty(sKey));
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			log.error("PropertiesReader", ex);
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("PropertiesReader", e);
 				}
 			}
 		}
@@ -110,13 +115,13 @@ public class PropertiesReader {
 				}
 			}
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			log.error("PropertiesReader", ex);
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("PropertiesReader", e);
 				}
 			}
 		}
@@ -139,13 +144,13 @@ public class PropertiesReader {
 			prop.containsKey(sKey);
 
 		} catch (IOException io) {
-			io.printStackTrace();
+			log.error("PropertiesReader", io);
 		} finally {
 			if (output != null) {
 				try {
 					output.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("PropertiesReader", e);
 				}
 			}
 		}

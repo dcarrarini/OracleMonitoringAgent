@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Grafana-OracleAgent" />
         <module name="OracleMonitoringAgent" />
+        <module name="jOracleMonitoring" />
       </profile>
     </annotationProcessing>
   </component>

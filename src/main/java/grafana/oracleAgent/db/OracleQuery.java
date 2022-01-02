@@ -2,8 +2,8 @@ package grafana.oracleAgent.db;
 
 import grafana.oracleAgent.main.Main;
 import grafana.oracleAgent.main.PropertiesReader;
-import org.apache.log4j.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +14,8 @@ import java.util.Properties;
 
 public class OracleQuery {
     static Properties configurator = PropertiesReader.getProperties();
-    static Logger log = Logger.getLogger(OracleDB.class.getName());
+    private static final Logger log
+            = LoggerFactory.getLogger(OracleQuery.class);
 
     //AVOID LITERAL - SONARLINT
     String datetime = "datetime";
@@ -54,7 +55,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.tablespace");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -88,7 +89,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.exportSQLTOPConsumingMoreCPU");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -121,7 +122,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 2, "grafana_oracleagent.top10sessioncpu");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -155,7 +156,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.exportSQLTOPConsumingMoreCPU");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -188,7 +189,7 @@ public class OracleQuery {
             }
 
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -230,7 +231,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 2, "grafana_oracleagent.server_info");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -271,7 +272,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.sga_usage");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -346,7 +347,7 @@ public class OracleQuery {
                 mySQLInsert.insertTablespace(MysqlConnection, sqlInsert, 1, "grafana_oracleagent.export_datafile_io");
             }
         } catch (SQLException e) {
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -379,7 +380,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -418,7 +419,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -455,7 +456,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -518,7 +519,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -551,7 +552,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -584,7 +585,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -632,7 +633,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
     public void exporterTop10Tables(Connection OracleConnection, Connection MysqlConnection) {
@@ -683,7 +684,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 
@@ -732,7 +733,7 @@ public class OracleQuery {
             }
         } catch (SQLException e) {
             log.error(sqlInsert);
-            log.error(e);
+            log.error("OracleQuery", e);
         }
     }
 }

@@ -8,11 +8,13 @@ import it.sauronsoftware.cron4j.Scheduler;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
-    static Logger log = Logger.getLogger(Main.class.getName());
+    static { System.setProperty("logback.configurationFile", "cfg/logback.xml");}
+    private static final Logger log
+            = LoggerFactory.getLogger(Main.class);
     static Properties configurator = PropertiesReader.getProperties();
     //Carico dbid
     public static String DBID = configurator.getProperty("DBID");
@@ -32,17 +34,21 @@ public class Main {
     static String cronSchedulerStaleStats = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-STALE-STATS");
 
     public static void main(String[] args)  {
-        PropertyConfigurator.configure("./cfg/log4j.properties");
+        log.info("Oracle agent monitoring started");
+
         OracleDB odb = new OracleDB();
         Connection OracleConnection = odb.connect();
         MysqlDB mdb = new MysqlDB();
         Connection MysqlConnection = mdb.getMYSQLDBConnection();
+
         try {
             log.info("Oracle Connection MetaData:" + OracleConnection.getMetaData());
             log.info("MySQL Connection MetaData:" + MysqlConnection.getMetaData());
         } catch (SQLException e) {
-            log.error(e);
+            log.error("MainSQLException", e);
         }
+
+
         // Crea l'istanza dello scheduler.
         Scheduler schedulerTablespaces = new Scheduler();
         // Schedula un task, che sarà eseguito ogni minuto.
@@ -183,7 +189,6 @@ public class Main {
         exporterTablesInfo.start();
         exporterTop10Tables.start();
         exporterStaleStats.start();
-
         /*
         // Lascia in esecuzione per dieci minuti.
         try {

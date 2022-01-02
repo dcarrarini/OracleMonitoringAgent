@@ -1,0 +1,217 @@
+2022-01-02 18:09:13,325 INFO grafana.oracleAgent.main.Main [main] Oracle agent monitoring started
+2022-01-02 18:09:13,786 ERROR grafana.oracleAgent.db.OracleDB [main] OracleDB
+java.sql.SQLRecoverableException: Errore di I/O: The Network Adapter could not establish the connection
+	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:874)
+	at oracle.jdbc.driver.PhysicalConnection.connect(PhysicalConnection.java:807)
+	at oracle.jdbc.driver.T4CDriverExtension.getConnection(T4CDriverExtension.java:77)
+	at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:767)
+	at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:572)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at grafana.oracleAgent.db.OracleDB.connect(OracleDB.java:27)
+	at grafana.oracleAgent.main.Main.main(Main.java:39)
+Caused by: oracle.net.ns.NetException: The Network Adapter could not establish the connection
+	at oracle.net.nt.ConnStrategy.execute(ConnStrategy.java:621)
+	at oracle.net.resolver.AddrResolution.resolveAndExecute(AddrResolution.java:585)
+	at oracle.net.ns.NSProtocol.establishConnection(NSProtocol.java:719)
+	at oracle.net.ns.NSProtocol.connect(NSProtocol.java:333)
+	at oracle.jdbc.driver.T4CConnection.connect(T4CConnection.java:1636)
+	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:606)
+	... 8 common frames omitted
+Caused by: java.io.IOException: Connection refused, socket connect lapse 1 ms. /0:0:0:0:0:0:0:1 1521 0 1 true
+	at oracle.net.nt.TcpNTAdapter.connect(TcpNTAdapter.java:233)
+	at oracle.net.nt.ConnOption.connect(ConnOption.java:202)
+	at oracle.net.nt.ConnStrategy.execute(ConnStrategy.java:554)
+	... 13 common frames omitted
+Caused by: java.net.ConnectException: Connection refused
+	at sun.nio.ch.Net.connect0(Native Method)
+	at sun.nio.ch.Net.connect(Net.java:482)
+	at sun.nio.ch.Net.connect(Net.java:474)
+	at sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:647)
+	at java.nio.channels.SocketChannel.open(SocketChannel.java:189)
+	at oracle.net.nt.TimeoutSocketChannel.connect(TimeoutSocketChannel.java:99)
+	at oracle.net.nt.TimeoutSocketChannel.<init>(TimeoutSocketChannel.java:77)
+	at oracle.net.nt.TcpNTAdapter.connect(TcpNTAdapter.java:192)
+	... 15 common frames omitted
+2022-01-02 18:09:13,902 ERROR grafana.oracleAgent.db.MysqlDB [main] MysqlDB
+com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:403)
+	at com.mysql.jdbc.SQLError.createCommunicationsException(SQLError.java:990)
+	at com.mysql.jdbc.MysqlIO.<init>(MysqlIO.java:335)
+	at com.mysql.jdbc.ConnectionImpl.coreConnect(ConnectionImpl.java:2187)
+	at com.mysql.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:2220)
+	at com.mysql.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:2015)
+	at com.mysql.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:768)
+	at com.mysql.jdbc.JDBC4Connection.<init>(JDBC4Connection.java:47)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:403)
+	at com.mysql.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:385)
+	at com.mysql.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:323)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at grafana.oracleAgent.db.MysqlDB.getMYSQLDBConnection(MysqlDB.java:31)
+	at grafana.oracleAgent.main.Main.main(Main.java:41)
+Caused by: java.net.ConnectException: Connection refused (Connection refused)
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:607)
+	at com.mysql.jdbc.StandardSocketFactory.connect(StandardSocketFactory.java:211)
+	at com.mysql.jdbc.MysqlIO.<init>(MysqlIO.java:299)
+	... 16 common frames omitted
+2022-01-02 18:09:41,992 INFO grafana.oracleAgent.main.Main [main] Oracle agent monitoring started
+2022-01-02 18:09:42,370 ERROR grafana.oracleAgent.db.OracleDB [main] OracleDB
+java.sql.SQLRecoverableException: Errore di I/O: The Network Adapter could not establish the connection
+	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:874)
+	at oracle.jdbc.driver.PhysicalConnection.connect(PhysicalConnection.java:807)
+	at oracle.jdbc.driver.T4CDriverExtension.getConnection(T4CDriverExtension.java:77)
+	at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:767)
+	at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:572)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at grafana.oracleAgent.db.OracleDB.connect(OracleDB.java:27)
+	at grafana.oracleAgent.main.Main.main(Main.java:39)
+Caused by: oracle.net.ns.NetException: The Network Adapter could not establish the connection
+	at oracle.net.nt.ConnStrategy.execute(ConnStrategy.java:621)
+	at oracle.net.resolver.AddrResolution.resolveAndExecute(AddrResolution.java:585)
+	at oracle.net.ns.NSProtocol.establishConnection(NSProtocol.java:719)
+	at oracle.net.ns.NSProtocol.connect(NSProtocol.java:333)
+	at oracle.jdbc.driver.T4CConnection.connect(T4CConnection.java:1636)
+	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:606)
+	... 8 common frames omitted
+Caused by: java.io.IOException: Connection refused, socket connect lapse 0 ms. /0:0:0:0:0:0:0:1 1521 0 1 true
+	at oracle.net.nt.TcpNTAdapter.connect(TcpNTAdapter.java:233)
+	at oracle.net.nt.ConnOption.connect(ConnOption.java:202)
+	at oracle.net.nt.ConnStrategy.execute(ConnStrategy.java:554)
+	... 13 common frames omitted
+Caused by: java.net.ConnectException: Connection refused
+	at sun.nio.ch.Net.connect0(Native Method)
+	at sun.nio.ch.Net.connect(Net.java:482)
+	at sun.nio.ch.Net.connect(Net.java:474)
+	at sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:647)
+	at java.nio.channels.SocketChannel.open(SocketChannel.java:189)
+	at oracle.net.nt.TimeoutSocketChannel.connect(TimeoutSocketChannel.java:99)
+	at oracle.net.nt.TimeoutSocketChannel.<init>(TimeoutSocketChannel.java:77)
+	at oracle.net.nt.TcpNTAdapter.connect(TcpNTAdapter.java:192)
+	... 15 common frames omitted
+2022-01-02 18:09:42,462 ERROR grafana.oracleAgent.db.MysqlDB [main] MysqlDB
+com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:403)
+	at com.mysql.jdbc.SQLError.createCommunicationsException(SQLError.java:990)
+	at com.mysql.jdbc.MysqlIO.<init>(MysqlIO.java:335)
+	at com.mysql.jdbc.ConnectionImpl.coreConnect(ConnectionImpl.java:2187)
+	at com.mysql.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:2220)
+	at com.mysql.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:2015)
+	at com.mysql.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:768)
+	at com.mysql.jdbc.JDBC4Connection.<init>(JDBC4Connection.java:47)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:403)
+	at com.mysql.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:385)
+	at com.mysql.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:323)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at grafana.oracleAgent.db.MysqlDB.getMYSQLDBConnection(MysqlDB.java:31)
+	at grafana.oracleAgent.main.Main.main(Main.java:41)
+Caused by: java.net.ConnectException: Connection refused (Connection refused)
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:607)
+	at com.mysql.jdbc.StandardSocketFactory.connect(StandardSocketFactory.java:211)
+	at com.mysql.jdbc.MysqlIO.<init>(MysqlIO.java:299)
+	... 16 common frames omitted
+2022-01-02 18:10:22,597 INFO grafana.oracleAgent.main.Main [main] Oracle agent monitoring started
+2022-01-02 18:12:13,497 INFO grafana.oracleAgent.main.Main [main] Oracle agent monitoring started
+2022-01-02 18:12:13,960 ERROR grafana.oracleAgent.db.OracleDB [main] OracleDB
+java.sql.SQLRecoverableException: Errore di I/O: The Network Adapter could not establish the connection
+	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:874)
+	at oracle.jdbc.driver.PhysicalConnection.connect(PhysicalConnection.java:807)
+	at oracle.jdbc.driver.T4CDriverExtension.getConnection(T4CDriverExtension.java:77)
+	at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:767)
+	at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:572)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at grafana.oracleAgent.db.OracleDB.connect(OracleDB.java:27)
+	at grafana.oracleAgent.main.Main.main(Main.java:40)
+Caused by: oracle.net.ns.NetException: The Network Adapter could not establish the connection
+	at oracle.net.nt.ConnStrategy.execute(ConnStrategy.java:621)
+	at oracle.net.resolver.AddrResolution.resolveAndExecute(AddrResolution.java:585)
+	at oracle.net.ns.NSProtocol.establishConnection(NSProtocol.java:719)
+	at oracle.net.ns.NSProtocol.connect(NSProtocol.java:333)
+	at oracle.jdbc.driver.T4CConnection.connect(T4CConnection.java:1636)
+	at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:606)
+	... 8 common frames omitted
+Caused by: java.io.IOException: Connection refused, socket connect lapse 0 ms. /0:0:0:0:0:0:0:1 1521 0 1 true
+	at oracle.net.nt.TcpNTAdapter.connect(TcpNTAdapter.java:233)
+	at oracle.net.nt.ConnOption.connect(ConnOption.java:202)
+	at oracle.net.nt.ConnStrategy.execute(ConnStrategy.java:554)
+	... 13 common frames omitted
+Caused by: java.net.ConnectException: Connection refused
+	at sun.nio.ch.Net.connect0(Native Method)
+	at sun.nio.ch.Net.connect(Net.java:482)
+	at sun.nio.ch.Net.connect(Net.java:474)
+	at sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:647)
+	at java.nio.channels.SocketChannel.open(SocketChannel.java:189)
+	at oracle.net.nt.TimeoutSocketChannel.connect(TimeoutSocketChannel.java:99)
+	at oracle.net.nt.TimeoutSocketChannel.<init>(TimeoutSocketChannel.java:77)
+	at oracle.net.nt.TcpNTAdapter.connect(TcpNTAdapter.java:192)
+	... 15 common frames omitted
+2022-01-02 18:12:14,065 ERROR grafana.oracleAgent.db.MysqlDB [main] MysqlDB
+com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:403)
+	at com.mysql.jdbc.SQLError.createCommunicationsException(SQLError.java:990)
+	at com.mysql.jdbc.MysqlIO.<init>(MysqlIO.java:335)
+	at com.mysql.jdbc.ConnectionImpl.coreConnect(ConnectionImpl.java:2187)
+	at com.mysql.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:2220)
+	at com.mysql.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:2015)
+	at com.mysql.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:768)
+	at com.mysql.jdbc.JDBC4Connection.<init>(JDBC4Connection.java:47)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:403)
+	at com.mysql.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:385)
+	at com.mysql.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:323)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:247)
+	at grafana.oracleAgent.db.MysqlDB.getMYSQLDBConnection(MysqlDB.java:31)
+	at grafana.oracleAgent.main.Main.main(Main.java:42)
+Caused by: java.net.ConnectException: Connection refused (Connection refused)
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:607)
+	at com.mysql.jdbc.StandardSocketFactory.connect(StandardSocketFactory.java:211)
+	at com.mysql.jdbc.MysqlIO.<init>(MysqlIO.java:299)
+	... 16 common frames omitted
