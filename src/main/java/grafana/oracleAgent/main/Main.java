@@ -17,7 +17,7 @@ public class Main {
             = LoggerFactory.getLogger(Main.class);
     static Properties configurator = PropertiesReader.getProperties();
     //Carico dbid
-    public static String DBID = configurator.getProperty("DBID");
+    public static final String sDBID = configurator.getProperty("DBID");
     //Carico le schedulazioni
     static String cronSchedulerTablespace = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TABLESPACES");
     static String cronSchedulerTopConsuming = configurator.getProperty("CRONEXPRESSION-GRAFANA-ORACLE-AGENT-TOPCONSUMING");
@@ -37,13 +37,12 @@ public class Main {
         log.info("Oracle agent monitoring started");
 
         OracleDB odb = new OracleDB();
-        Connection OracleConnection = odb.connect();
-        MysqlDB mdb = new MysqlDB();
-        Connection MysqlConnection = mdb.getMYSQLDBConnection();
+        Connection connOracleConnection = odb.connect();
+        Connection connMysqlConnection = MysqlDB.getMYSQLDBConnection();
 
         try {
-            log.info("Oracle Connection MetaData:" + OracleConnection.getMetaData());
-            log.info("MySQL Connection MetaData:" + MysqlConnection.getMetaData());
+            log.info("Oracle Connection MetaData:" + connOracleConnection.getMetaData());
+            log.info("MySQL Connection MetaData:" + connMysqlConnection.getMetaData());
         } catch (SQLException e) {
             log.error("MainSQLException", e);
         }
@@ -55,7 +54,7 @@ public class Main {
         schedulerTablespaces.schedule(cronSchedulerTablespace, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exportTablespace(OracleConnection, MysqlConnection);
+                otbs.exportTablespace(connOracleConnection, connMysqlConnection);
                 log.info("schedulerTablespaces - run completed");
             }
         });
@@ -65,10 +64,10 @@ public class Main {
         schedulerTopConsuming.schedule(cronSchedulerTopConsuming, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exportSQLTOPConsumingMoreCPU(OracleConnection, MysqlConnection);
-                otbs.exportTop10CPUconsumingSession(OracleConnection, MysqlConnection);
-                otbs.exportCurrentActiveSession(OracleConnection, MysqlConnection);
-                otbs.exportSgaUsage(OracleConnection, MysqlConnection);
+                otbs.exportSQLTOPConsumingMoreCPU(connOracleConnection, connMysqlConnection);
+                otbs.exportTop10CPUconsumingSession(connOracleConnection, connMysqlConnection);
+                otbs.exportCurrentActiveSession(connOracleConnection, connMysqlConnection);
+                otbs.exportSgaUsage(connOracleConnection, connMysqlConnection);
                 log.info("schedulerTopConsuming - run completed");
             }
         });
@@ -77,7 +76,7 @@ public class Main {
         exporttempBySession.schedule(cronSchedulerTempBySession, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporttempBySession(OracleConnection, MysqlConnection);
+                otbs.exporttempBySession(connOracleConnection, connMysqlConnection);
                 log.info("exporttempBySession - run Completed");
             }
         });
@@ -86,7 +85,7 @@ public class Main {
         exportSgaUsage.schedule(cronSchedulerSgaUsage, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporttempBySession(OracleConnection, MysqlConnection);
+                otbs.exporttempBySession(connOracleConnection, connMysqlConnection);
                 log.info("exportSgaUsage - run Completed");
             }
         });
@@ -95,7 +94,7 @@ public class Main {
         exportDatafileIO.schedule(cronSchedulerExportDatafileIO, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exportDatafileIO(OracleConnection, MysqlConnection);
+                otbs.exportDatafileIO(connOracleConnection, connMysqlConnection);
                 log.info("exportDatafileIO - run Completed");
             }
         });
@@ -104,7 +103,7 @@ public class Main {
         exportServerInfo.schedule(cronSchedulerExportServerInfo, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exportServerInfo(OracleConnection, MysqlConnection);
+                otbs.exportServerInfo(connOracleConnection, connMysqlConnection);
                 log.info("exportDatafileIO - run Completed");
             }
         });
@@ -113,7 +112,7 @@ public class Main {
         exporterArchiveLogMode.schedule(cronSchedulerArchiveLogMode, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.archiveLogMode(OracleConnection, MysqlConnection);
+                otbs.archiveLogMode(connOracleConnection, connMysqlConnection);
                 //otbs.exporterRedoLOG(OracleConnection, MysqlConnection);
                 log.info("exporterArchiveLogMode - run Completed");
             }
@@ -123,8 +122,8 @@ public class Main {
         exporterSessionsDetails.schedule(cronSchedulerSessionsDetails, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporterSessions(OracleConnection, MysqlConnection);
-                otbs.exporterRunningSQL(OracleConnection, MysqlConnection);
+                otbs.exporterSessions(connOracleConnection, connMysqlConnection);
+                otbs.exporterRunningSQL(connOracleConnection, connMysqlConnection);
                 log.info("exporterSessionsDetails - run Completed");
             }
         });
@@ -133,7 +132,7 @@ public class Main {
         exporterRedoLog.schedule(cronSchedulerRedoLog, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporterRedoLOG(OracleConnection, MysqlConnection);
+                otbs.exporterRedoLOG(connOracleConnection, connMysqlConnection);
                 log.info("exporterRedoLog - run Completed");
             }
         });
@@ -142,9 +141,9 @@ public class Main {
         exporterDBBasicInfo.schedule(cronSchedulerDBBasicInfo, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporterDBInfo(OracleConnection, MysqlConnection);
-                otbs.exporterDBVersion(OracleConnection, MysqlConnection);
-                log.info("exporterRedoLog - run Completed");
+                otbs.exporterDBInfo(connOracleConnection, connMysqlConnection);
+                otbs.exporterDBVersion(connOracleConnection, connMysqlConnection);
+                log.info("exporterDBInfo - run Completed");
             }
         });
 
@@ -152,7 +151,7 @@ public class Main {
         exporterTablesInfo.schedule(cronSchedulerTablesInfo, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporterTablesInfo(OracleConnection, MysqlConnection);
+                otbs.exporterTablesInfo(connOracleConnection, connMysqlConnection);
                 log.info("exporterTablesInfo - run Completed");
             }
         });
@@ -161,7 +160,7 @@ public class Main {
         exporterTop10Tables.schedule(cronSchedulerTop10Tables, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporterTop10Tables(OracleConnection, MysqlConnection);
+                otbs.exporterTop10Tables(connOracleConnection, connMysqlConnection);
                 log.info("exporterTop10Tables - run Completed");
             }
         });
@@ -170,7 +169,7 @@ public class Main {
         exporterStaleStats.schedule(cronSchedulerStaleStats, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
-                otbs.exporterStaleStats(OracleConnection, MysqlConnection);
+                otbs.exporterStaleStats(connOracleConnection, connMysqlConnection);
                 log.info("exporterStaleStats - run Completed");
             }
         });

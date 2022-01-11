@@ -32,7 +32,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -44,7 +45,7 @@ public class OracleQuery {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("tablespace_name") +
                             "','" + rs.getString("UsedMb") + "','" + rs.getString("AllocatedMb") + "','" +
-                            rs.getString("TotalMb") + "','" + rs.getString("FreePercentage") + "','" + Main.DBID + "')";
+                            rs.getString("TotalMb") + "','" + rs.getString("FreePercentage") + "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -65,7 +66,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             //String CSVFile = configurator.getProperty("SQLTOPConsumingMoreCPUCSV");
             int last = 1;
             int size = 0;
@@ -79,7 +81,7 @@ public class OracleQuery {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(tablespace)
                             + "','" + rs.getString("temp_size") + "','" + rs.getString("Instance") + "','" +
                             rs.getString("sid_serial") + "','" + rs.getString(username) + "','" + rs.getString(program)
-                            + "','" + rs.getString(status) + "','" + rs.getString(sql_id) + "','" + rs.getString("fulltext")+ "','" + Main.DBID + "')";
+                            + "','" + rs.getString(status) + "','" + rs.getString(sql_id) + "','" + rs.getString("fulltext")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -101,7 +103,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -112,7 +115,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("rank") + "','" + rs.getString("sid") + "','" +
-                            rs.getString("sess_serial") + "','" + rs.getString(program) + "','" + rs.getString("CPU_Mins")+ "','" + Main.DBID + "')";
+                            rs.getString("sess_serial") + "','" + rs.getString(program) + "','" + rs.getString("CPU_Mins")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -132,7 +135,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             //String CSVFile = configurator.getProperty("tempBySessionCSV");
             int last = 1;
             int size = 0;
@@ -146,7 +150,7 @@ public class OracleQuery {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString(tablespace) + "," +
                             rs.getString("temp_size") + "," + rs.getString("Instance") + "," + rs.getString("sid_serial") + ","
                             + rs.getString(username) + "," + rs.getString(program) + "," + rs.getString(status) + "," + rs.getString(sql_id)
-                            + "," + rs.getString("fulltext")+ "','" + Main.DBID + "')";
+                            + "," + rs.getString("fulltext")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -166,7 +170,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+            //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             //String CSVFile = configurator.getProperty("tempBySessionCSV");
             int last = 1;
             int size = 0;
@@ -178,7 +183,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("active") + "','" +
-                            rs.getString("max_session")+ "','" + Main.DBID + "')";
+                            rs.getString("max_session")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -210,7 +215,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+            //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -221,7 +227,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("component") + "','" +
-                            rs.getString("value")+ "','" + Main.DBID + "')";
+                            rs.getString("value")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -251,7 +257,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+            //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -262,7 +269,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("free_mb") + "','" +
-                            rs.getString("used_mb") + "','" + rs.getString("total_mb")+ "','" + Main.DBID + "')";
+                            rs.getString("used_mb") + "','" + rs.getString("total_mb")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -321,7 +328,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+            //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -337,7 +345,7 @@ public class OracleQuery {
                             rs.getString("single_block_reads") + "','" + rs.getString("read_time") + "','" +
                             rs.getString("write_time") + "','" + rs.getString("single_block_read_time") + "','" +
                             rs.getString("avg_io_time") + "','" + rs.getString("last_io_time") + "','" +
-                            rs.getString("min_io_time") + "','" + rs.getString("max_io_read_time")+ "','" + Main.DBID + "')";
+                            rs.getString("min_io_time") + "','" + rs.getString("max_io_read_time")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -358,7 +366,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -369,7 +378,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("log_mode") + "','" +
-                            rs.getString("log_enabled")+ "','" + Main.DBID + "')";
+                            rs.getString("log_enabled")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -391,7 +400,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -408,7 +418,7 @@ public class OracleQuery {
                             rs.getString(status) + "','" +
                             rs.getString("machine") + "','" +
                             rs.getString(program) + "','" +
-                            rs.getString(sql_id)+ "','" + Main.DBID + "')";
+                            rs.getString(sql_id)+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -430,7 +440,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -445,7 +456,7 @@ public class OracleQuery {
                             rs.getInt("serial") + "','" +
                             rs.getString(sql_id) + "','" +
                             rs.getString("optimizer_mode") + "','" +
-                            rs.getString("sql_text").replaceAll("'","''")+ "','" + Main.DBID + "')";
+                            rs.getString("sql_text").replaceAll("'","''")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -487,7 +498,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -508,7 +520,7 @@ public class OracleQuery {
                             rs.getString("first_time") + "','" +
                             rs.getString("next_time") + "','" +
                             rs.getString("type") + "','" +
-                            rs.getString("member") + "','" + Main.DBID + "')";
+                            rs.getString("member") + "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -530,7 +542,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -541,7 +554,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" + rs.getString("name") + "','" +
-                            rs.getString("platform_name")+ "','" + Main.DBID + "')";
+                            rs.getString("platform_name")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -563,7 +576,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -574,7 +588,7 @@ public class OracleQuery {
             if (size > 0) {
                 while (rs.next()) {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" +
-                            rs.getString("banner")+ "','" + Main.DBID + "')";
+                            rs.getString("banner")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -606,7 +620,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -622,7 +637,7 @@ public class OracleQuery {
                             rs.getString("tablespace_name") + "','" +
                             rs.getInt("num_rows") + "','" +
                             rs.getInt("size_mb") + "','" +
-                            rs.getString("last_analyzed")+ "','" + Main.DBID + "')";
+                            rs.getString("last_analyzed")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -659,7 +674,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -672,7 +688,7 @@ public class OracleQuery {
                     sqlInsert = sqlInsert + "('" + rs.getString(datetime) + "','" +
                             rs.getString("owner") + "','" +
                             rs.getString("segment_name") + "','" +
-                            rs.getInt("size_mb")+ "','" + Main.DBID + "')";
+                            rs.getInt("size_mb")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
@@ -706,7 +722,8 @@ public class OracleQuery {
         try (Statement statement = OracleConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
             ResultSet rs = statement.executeQuery(sqlQuery);
-            List<String> ExportList = new ArrayList<String>();
+          //SONAR
+            //List<String> ExportList = new ArrayList<String>();
             int last = 1;
             int size = 0;
             if (rs != null) {
@@ -721,7 +738,7 @@ public class OracleQuery {
                             rs.getString("table_name") + "','" +
                             rs.getString("stale_stats") + "','" +
                             rs.getInt("stale_stats_boo") + "','" +
-                            rs.getString("last_analyzed")+ "','" + Main.DBID + "')";
+                            rs.getString("last_analyzed")+ "','" + Main.sDBID + "')";
                     if (last < size) {
                         sqlInsert = sqlInsert + ",";
                     }
