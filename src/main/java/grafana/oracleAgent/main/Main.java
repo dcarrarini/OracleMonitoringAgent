@@ -101,7 +101,7 @@ public class Main {
         });
 
         Scheduler exportServerInfo = new Scheduler();
-        exportDatafileIO.schedule(cronSchedulerExportServerInfo, new Runnable() {
+        exportServerInfo.schedule(cronSchedulerExportServerInfo, new Runnable() {
             public void run() {
                 OracleQuery otbs = new OracleQuery();
                 otbs.exportServerInfo(OracleConnection, MysqlConnection);
@@ -189,6 +189,7 @@ public class Main {
         exporterTablesInfo.start();
         exporterTop10Tables.start();
         exporterStaleStats.start();
+        exportServerInfo.start();
         /*
         // Lascia in esecuzione per dieci minuti.
         try {
