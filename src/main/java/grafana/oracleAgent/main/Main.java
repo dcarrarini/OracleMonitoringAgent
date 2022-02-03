@@ -11,6 +11,11 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author diego
+ * 
+ */
 public class Main {
     static { System.setProperty("logback.configurationFile", "cfg/logback.xml");}
     private static final Logger log
